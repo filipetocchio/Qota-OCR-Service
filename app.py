@@ -392,7 +392,6 @@ def process_document_route():
 
 # --- Ponto de Entrada da Aplicação ---
 if __name__ == '__main__':
-    # A execução via 'app.run()' é ideal para desenvolvimento e depuração.
     # Em um ambiente de produção, utilize um servidor WSGI como Gunicorn ou uWSGI
     # para garantir performance, segurança e escalabilidade.
     # Exemplo com Gunicorn: gunicorn --bind 0.0.0.0:8000 your_module_name:app

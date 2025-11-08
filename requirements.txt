@@ -24,7 +24,7 @@ numpy==1.26.4
 # Biblioteca para processamento avançado de texto e extração de entidades.
 spacy==3.8.0
 
-# --- String Matching (Opcional, mas útil para futuras melhorias) ---
+# --- String Matching  ---
 # Bibliotecas para comparação de strings por similaridade (fuzzy matching).
 thefuzz==0.22.1
 python-Levenshtein==0.25.1
