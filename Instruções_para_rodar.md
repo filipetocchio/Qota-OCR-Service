@@ -1,73 +1,76 @@
-###  Pré-requisitos Globais
+# Instruções para Execução - Qota OCR Service
 
-Antes de começar, garanta que você tem os seguintes softwares instalados e configurados no seu sistema:
+Este documento detalha os passos necessários para configurar e executar o microsserviço de OCR do Qota em um ambiente de desenvolvimento. A correta configuração das dependências externas é **crucial** para o funcionamento do sistema.
 
--   **[Git](https://git-scm.com/downloads)**: Para clonar o repositório.
--   **[Node.js](https://nodejs.org/en/)**: Versão `18.x` ou superior.
--   **[Python](https://www.python.org/downloads/)**: Versão `3.9` ou superior.
+### Pré-requisitos Globais
 
-### ⚙️ Instalação das Dependências do OCR (Obrigatório)
+Garanta que você tem os seguintes softwares instalados:
 
-O microsserviço de OCR depende de duas ferramentas externas. A instalação correta delas é **crucial** para o funcionamento do sistema.
+* **[Git](https://git-scm.com/downloads)**: Para clonar o repositório.
+* **[Python](https://www.python.org/downloads/)**: Versão `3.9` ou superior. Ao instalar, marque a opção **"Add Python to PATH"**.
 
 ---
-#### **Instrução para Windows**
 
-1.  **Instalar Tesseract-OCR:**
-    * Baixe o instalador `tesseract-ocr-w64-setup-*.exe` a partir de [**Tesseract at UB Mannheim**](https://github.com/UB-Mannheim/tesseract/wiki).
-    * Execute o instalador. Durante a instalação, na tela "Additional language data", marque a opção **"Portuguese"** para adicionar o suporte ao idioma português.
-    * **IMPORTANTE:** Na tela de instalação, certifique-se de marcar a opção **"Add Tesseract to the system PATH"**. Isso configura a variável de ambiente automaticamente.
+### ⚙️ 1. Instalação das Dependências de Sistema (Obrigatório)
 
-2.  **Instalar Poppler:**
-    * Baixe a versão mais recente do [**Poppler for Windows**](https://github.com/oschwartz10612/poppler-windows/releases/). Procure pelo arquivo `Release-*.zip`.
-    * Extraia o conteúdo do arquivo `.zip` para uma pasta permanente no seu computador (ex: `C:\Program Files\poppler`).
+O serviço de OCR depende de ferramentas de sistema que precisam ser instaladas e configuradas **antes** da instalação das bibliotecas Python.
+
+#### **Instrução para Windows (Leitura Obrigatória)**
+
+A instalação no Windows requer três componentes principais:
+
+##### **A. Tesseract-OCR (Motor de OCR)**
+
+1.  **Baixar:** Baixe o instalador `tesseract-ocr-w64-setup-*.exe` a partir de [**Tesseract at UB Mannheim**](https://github.com/UB-Mannheim/tesseract/wiki).
+2.  **Instalar:**
+    * Execute o instalador.
+    * Na tela "Select Components", marque a opção **"Portuguese"** para adicionar o suporte ao idioma português.
+    * **IMPORTANTE:** Se a opção **"Add Tesseract to the system PATH"** estiver disponível, marque-a.
+
+3.  **Configurar o PATH (Se a opção acima falhou):**
+    * Muitas vezes, a opção de adicionar ao PATH não funciona. Para garantir, adicione manualmente:
+    * Pesquise por **"Editar as variáveis de ambiente do sistema"** no menu Iniciar.
+    * Clique em "Variáveis de Ambiente...".
+    * Na seção "Variáveis do sistema", encontre e selecione a variável `Path` e clique em "Editar".
+    * Clique em "Novo" e adicione o caminho da pasta onde o Tesseract foi instalado. (Por padrão: `C:\Program Files\Tesseract-OCR`)
+    * Clique em "OK" em todas as janelas.
+
+##### **B. Poppler (Leitor de PDF)**
+
+1.  **Baixar:** Baixe a versão mais recente do [**Poppler for Windows**](https://github.com/oschwartz10612/poppler-windows/releases/). Procure pelo arquivo `Release-*.zip`.
+2.  **Instalar:**
+    * Extraia o conteúdo do arquivo `.zip` para uma pasta permanente (ex: `C:\Program Files\poppler`).
     * Copie o caminho da pasta `bin` que está dentro do diretório que você extraiu (ex: `C:\Program Files\poppler\bin`).
-    * Adicione este caminho ao **PATH do sistema**:
-        * Pesquise por "Editar as variáveis de ambiente do sistema" no menu Iniciar.
-        * Clique em "Variáveis de Ambiente...".
-        * Na seção "Variáveis do sistema", encontre e selecione a variável `Path` e clique em "Editar".
-        * Clique em "Novo", cole o caminho da pasta `bin` do Poppler e clique em "OK" em todas as janelas.
+3.  **Configurar o PATH:**
+    * Siga os mesmos passos do Tesseract para **"Editar as variáveis de ambiente do sistema"**.
+    * Adicione um **novo** caminho ao seu `Path` do sistema, colando o caminho da pasta `bin` do Poppler.
 
-3.  **Verificação:**
-    * Abra um **novo** terminal (importante para carregar o novo PATH) e execute os comandos `tesseract --version` e `pdftoppm -v`. Se ambos os comandos exibirem as versões das ferramentas, a instalação foi bem-sucedida.
+##### **C. Visual Studio Build Tools (Compilador C++)**
 
----
-#### **Instrução para Linux (Debian/Ubuntu)**
-
-1.  **Instalar Tesseract-OCR e Poppler:**
-    * Abra o terminal e execute os comandos abaixo para instalar as ferramentas e o pacote de idioma português:
-    ```bash
-    sudo apt update
-    sudo apt install -y tesseract-ocr tesseract-ocr-por poppler-utils
-    ```
-2.  **Verificação:**
-    * Execute os comandos `tesseract --version` e `pdftoppm -v`. Se ambos exibirem as versões, a instalação está correta.
-
----
-#### **Instrução para macOS (usando Homebrew)**
-
-1.  **Instalar Tesseract-OCR e Poppler:**
-    * Se você não tiver o [Homebrew](https://brew.sh/index_pt-br) instalado, instale-o primeiro.
-    * Abra o terminal e execute os comandos para instalar as ferramentas e o pacote de idioma português:
-    ```bash
-    brew install tesseract tesseract-lang poppler
-    ```
-2.  **Verificação:**
-    * Execute os comandos `tesseract --version` e `pdftoppm -v`. Se ambos exibirem as versões, a instalação está correta.
+1.  **Baixar:** Esta é a dependência mais crítica, necessária para a biblioteca `PyMuPDF`.
+    * Vá para a página de downloads do Visual Studio: [**visualstudio.microsoft.com/downloads/**](https://visualstudio.microsoft.com/downloads/).
+    * Role a página até encontrar "Ferramentas para Visual Studio" (ou "Tools for Visual Studio").
+    * Encontre **"Build Tools for Visual Studio 2022"** e clique em "Baixar".
+2.  **Instalar:**
+    * Execute o instalador `vs_BuildTools.exe`.
+    * Na aba **"Cargas de Trabalho"**, marque **exatamente** esta opção: **"Desenvolvimento para desktop com C++"**.
+    * Clique em "Instalar". (Isso pode levar algum tempo e consumir alguns GB de espaço).
+3.  **Reiniciar:** Após a instalação, **reinicie o seu computador**.
 
 ---
 
+### 🚀  Configuração e Execução do Projeto
 
-### Instruções Passo a Passo
+Após instalar as 3 dependências de sistema (Tesseract, Poppler, VS Build Tools) e reiniciar, você pode configurar o projeto Python.
 
-#### 1. Clone o Repositório
+#### ** Clonar o Repositório**
 
 ```bash
-git https://github.com/filipetocchio/Qota-OCR-Service
-cd  Qota-OCR-Service
+git clone [https://github.com/filipetocchio/Qota-OCR-Service.git](https://github.com/filipetocchio/Qota-OCR-Service.git)
+cd Qota-OCR-Service
 ```
 
-#### 2. Configuração do Microsserviço de OCR (Python)
+####  Configuração do Microsserviço de OCR (Python)
 
 Este serviço precisa estar rodando para que a validação de documentos funcione.
 
@@ -89,9 +92,23 @@ python -m pip install --upgrade pip
 
 # Instale as dependências
 pip install -r requirements.txt
+```
 
-# Inicie o servidor Python (deixe este terminal aberto)
+**Nota:** Se a instalação do PyMuPDF falhar com um erro de "metadata", significa que as "Build Tools C++" (Passo 1.C) não foram instaladas corretamente.
+
+
+
+
+#### Baixar o Modelo de Linguagem (spaCy)
+
+
+```bash
+# Precisamos baixar o modelo de português para a extração de dados por IA.
+python -m spacy download pt_core_news_lg
+
+# E. Iniciar o Servidor
 python app.py
+
 ```
 
 > **Nota:** O servidor do OCR irá rodar na porta `8000`.
